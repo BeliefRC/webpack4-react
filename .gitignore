@@ -1,0 +1,5 @@
+.idea
+dist
+dll
+node_modules
+*.log
