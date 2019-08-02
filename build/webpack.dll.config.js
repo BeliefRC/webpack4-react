@@ -8,7 +8,7 @@ module.exports = {
   mode: 'production',
   entry: {
     // 定义程序中打包公共文件的入口文件vendor.js
-    jquery: ['jquery']
+    vendor: ['jquery','react','react-dom','react-router-dom']
   },
 
   output: {

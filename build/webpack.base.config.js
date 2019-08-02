@@ -1,12 +1,15 @@
 const path = require('path')
+const os = require('os');
 const webpack = require('webpack')
 const chalk = require('chalk');
+const HappyPack = require('happypack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const AddAssetHtmlWebpackPlugin = require('add-asset-html-webpack-plugin')
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const ProgressBarPlugin = require('progress-bar-webpack-plugin');
-
+const happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
 module.exports = {
+  performance: false,
   entry: ['./src/index.js'],
   resolve: {
     extensions: ['.js', '.jsx'],
@@ -23,7 +26,7 @@ module.exports = {
         exclude: /node_modules/,
         use: [
           {
-            loader: 'babel-loader'
+            loader: "happypack/loader?id=happyBabel"
           }
         ]
       },
@@ -33,7 +36,12 @@ module.exports = {
           MiniCssExtractPlugin.loader,
           'css-loader', // 编译css
           'postcss-loader',
-          'less-loader' // 编译scss
+          {
+            loader: "less-loader",
+            options: {
+              javascriptEnabled: true
+            }
+          }
         ]
       },
       {
@@ -83,11 +91,23 @@ module.exports = {
       clear: false
     }),
     new AddAssetHtmlWebpackPlugin({
-      filepath: path.resolve(__dirname, '../dll/jquery.dll.js') // 对应的 dll 文件路径
+      filepath: path.resolve(__dirname, '../dll/vendor.dll.js') // 对应的 dll 文件路径
     }),
     new webpack.DllReferencePlugin({
-      manifest: path.resolve(__dirname, '..', 'dll/jquery-manifest.json')
-    })
+      manifest: path.resolve(__dirname, '..', 'dll/vendor-manifest.json')
+    }),
+    new HappyPack({
+      //用id来标识 happypack处理那里类文件
+      id: 'happyBabel',
+      //如何处理  用法和loader 的配置一样
+      loaders: [{
+        loader: 'babel-loader?cacheDirectory=true',
+      }],
+      //共享进程池threadPool: HappyThreadPool 代表共享进程池，即多个 HappyPack 实例都使用同一个共享进程池中的子进程去处理任务，以防止资源占用过多。
+      threadPool: happyThreadPool,
+      //允许 HappyPack 输出日志
+      verbose: true,
+    }),
 
   ]
 }

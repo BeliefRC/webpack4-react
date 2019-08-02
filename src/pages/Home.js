@@ -2,11 +2,8 @@ import React, { Component, Fragment } from 'react'
 import xiazai from './xiazai.png'
 import Balboa from './Balboa.png'
 export default class Home extends Component {
-  constructor (props){
-    super(props)
-    this.state={
-      count:0
-    }
+  state={
+    count:0
   }
   render () {
     const {count}=this.state
